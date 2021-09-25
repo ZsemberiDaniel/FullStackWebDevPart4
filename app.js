@@ -22,6 +22,10 @@ mongoose.connect(config.MONGODB_URI)
 app.use(cors());
 app.use(express.static('build'));
 app.use(express.json());
+if (process.env.NODE_ENV === 'test') {
+    const router = require('./controllers/test');
+    app.use('/api/testing', router);
+}
 app.use('/api/blogs', middlewares.userExtractor, blogsRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/login', loginRouter);
