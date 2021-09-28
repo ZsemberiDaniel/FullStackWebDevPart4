@@ -55,8 +55,41 @@ blogsRouter.put('/:id', async (request, response, next) => {
     };
 
     try {
-        const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, newBlog, { new: true });
+        const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, newBlog, { new: true }).populate('user', { username: 1, name: 1 });
         response.status(200).json(updatedBlog);
+    } catch (exception) {
+        response.status(400);
+        next(exception);
+    }
+});
+
+blogsRouter.get('/:id', async (request, response, next) => {
+    try {
+        const blog = await Blog.findById(request.params.id).populate('user', { username: 1, name: 1 });
+        response.status(200).json(blog);
+    } catch (exception) {
+        response.status(400);
+        next(exception);
+    }
+});
+
+blogsRouter.post('/:id/comments', async (request, response, next) => {
+    try {
+        const blog = await Blog.findById(request.params.id);
+        blog.comments.push(`${new Date()} ${request.body.newComment}`);
+
+        await blog.save();
+        response.status(200).json(blog);
+    } catch (exception) {
+        response.status(400);
+        next(exception);
+    }
+});
+
+blogsRouter.get('/:id/comments', async (request, response, next) => {
+    try {
+        const blog = await Blog.findById(request.params.id);
+        response.status(200).json(blog.comments);
     } catch (exception) {
         response.status(400);
         next(exception);
